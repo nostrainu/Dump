@@ -1,11 +1,3 @@
-if game.PlaceId ~= 118821269826806 then return end
-
-if setthreadidentity and getthreadidentity then
-    if getthreadidentity() < 2 then
-        setthreadidentity(2)
-    end
-end
-
 getgenv().gift = getgenv().gift ~= false
 local un = getgenv().un or ""
 
