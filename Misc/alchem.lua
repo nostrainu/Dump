@@ -3,21 +3,14 @@ if game.PlaceId ~= 118821269826806 then return end
 getgenv().gift = getgenv().gift ~= false
 local un = getgenv().un or ""
 
-local plrs = game:GetService("Players")
-local localplr = plrs.LocalPlayer
-local replicated = game:GetService("ReplicatedStorage")
-local bag = localplr.PlayerGui.ScreenGui.Bag.ContentClip.Main._BagFrame
-local remote = replicated:WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("RemoteEvent")
-local giftRemote = replicated:WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("GiftRequest")
+local Players = game:GetService("Players")
+local lplr = Players.LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
+local bag = lplr.PlayerGui.ScreenGui.Bag.ContentClip.Main._BagFrame
+local remote = rs:WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("RemoteEvent")
+local giftRemote = rs:WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("GiftRequest")
 local vim = game:GetService("VirtualInputManager")
-local tools = localplr.PlayerGui.ScreenGui.Main.Tools:WaitForChild("\229\183\165\229\133\183\230\160\143")
-
-local oldFire; oldFire = hookfunction(Instance.new("RemoteEvent").FireServer, newcclosure(function(self, ...)
-	if (self == giftRemote or self == remote) and checkcaller() then
-		setcallingscript(nil)
-	end
-	return oldFire(self, ...)
-end))
+local tools = lplr.PlayerGui.ScreenGui.Main.Tools:WaitForChild("\229\183\165\229\133\183\230\160\143")
 
 local function pressKey(keyCode)
     vim:SendKeyEvent(true, keyCode, false, game)
@@ -77,7 +70,6 @@ task.spawn(function()
             local slots = getSlots()
             
             if #slots == 0 then
-                print("Out of potions to gift. Stopping loop.")
                 getgenv().gift = false
                 pressKey(Enum.KeyCode.Four)
                 break
