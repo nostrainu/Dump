@@ -3,13 +3,21 @@ if game.PlaceId ~= 118821269826806 then return end
 getgenv().gift = getgenv().gift ~= false
 local un = getgenv().un or ""
 
-local Players = game:GetService("Players")
-local lplr = Players.LocalPlayer
+local plrs = game:GetService("Players")
+local lplr = plrs.LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local bag = lplr.PlayerGui.ScreenGui.Bag.ContentClip.Main._BagFrame
-local remote = game:GetService("ReplicatedStorage"):WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("RemoteEvent")
-local giftRemote = game:GetService("ReplicatedStorage"):WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("GiftRequest")
+local remote = ReplicatedStorage:WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("RemoteEvent")
+local giftRemote = ReplicatedStorage:WaitForChild("Msg"):WaitForChild("RemoteEvent"):WaitForChild("GiftRequest")
 local vim = game:GetService("VirtualInputManager")
 local tools = lplr.PlayerGui.ScreenGui.Main.Tools:WaitForChild("\229\183\165\229\133\183\230\160\143")
+
+local oldFire; oldFire = hookfunction(Instance.new("RemoteEvent").FireServer, newcclosure(function(self, ...)
+	if (self == giftRemote or self == remote) and checkcaller() then
+		setcallingscript(nil)
+	end
+	return oldFire(self, ...)
+end))
 
 local function pressKey(keyCode)
     vim:SendKeyEvent(true, keyCode, false, game)
