@@ -45,7 +45,7 @@ local Window = Library:CreateWindow({
     Title = "Build A Ring Farm",
     Icon = "crown",
     Footer = "Build A Ring Farm",
-    MobileButtonsSide = "Right",
+    MobileButtonsSide = "Left",
     ShowMobileButtons = true,
     NotifySide = "Right",
     Center = true,
@@ -67,10 +67,8 @@ Tabs.Misc = Window:AddTab("Misc", "list")
 Tabs.Settings = Window:AddTab({ Name = "Settings", Icon = "settings", Side = "SidebarBottom", Visible = false })
 Tabs.Info = Window:AddTab({ Name = "Info", Icon = "info", Side = "Footer" })
 
---// ReplicatedStorage
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
---// Info Tab Elements (Changelogs)
 local InfoMiddleTabbox = Tabs.Info:AddMiddleTabbox({
     Name = "Changelogs",
     IconName = "info",
@@ -79,17 +77,12 @@ local InfoMiddleTabbox = Tabs.Info:AddMiddleTabbox({
     DefaultCollapsed = false
 })
 local InfoTab1 = InfoMiddleTabbox:AddTab("Update Log")
-local InfoTab2 = InfoMiddleTabbox:AddTab("Details")
 
-InfoTab1:AddLabel({ Text = "v1.2.0 Update Log", Center = true })
-InfoTab1:AddLabel({ Text = "• Added Compact Sidebar layout (SideBarText = false)", Align = "Left" })
-InfoTab1:AddLabel({ Text = "• Added Section Divider lines and Headers", Align = "Left" })
-InfoTab1:AddLabel({ Text = "• Added Support for Full-Width Center/Middle Groupboxes", Align = "Left" })
-InfoTab1:AddLabel({ Text = "• Removed old Custom Cursor feature", Align = "Left" })
+InfoTab1:AddLabel({ Text = "v0.1", Align = "Left" })
+InfoTab1:AddLabel({ Text = "• Initial Release", Align = "Left" })
+InfoTab1:AddLabel({ Text = "• Added Basic Features", Align = "Left" })
 
-InfoTab2:AddLabel({ Text = "Obsidian UI Library collapsible tabbox verification.", Center = true })
-
---// Main Tab Elements
+--// Main Tab 
 local MainGroupBox = Tabs.Main:AddLeftGroupbox({
     Name = "Farm",
     Center = true,
