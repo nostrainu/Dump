@@ -43,6 +43,8 @@ if gamesDb then
         print("[Loader] Initializing " .. gameData.Name .. "...")
         getgenv().uiActive = true
         
+        getgenv().CurrentGameName = gameData.Name
+        
         for _, file in ipairs(gameData.Files) do
             loadRemoteScript(file.Url)
         end
