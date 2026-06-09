@@ -40,11 +40,18 @@ local function loadFunctions()
 end
 loadFunctions()
 
+local Loading = Library:CreateLoading({
+    Title = "Poop-Cat",
+    Icon = "loader-2",
+    CurrentStep = 0,
+    TotalSteps = 3,
+    ShowSidebar = true,
+})
+
 --// Library Window
 local Window = Library:CreateWindow({
-    Title = "Build A Ring Farm",
-    Icon = "cat",
-    Footer = "Build A Ring Farm",
+    Title = "Example Script",
+    Footer = "Footer Text",
     MobileButtonsSide = "Left",
     ShowMobileButtons = true,
     NotifySide = "Right",
@@ -52,8 +59,12 @@ local Window = Library:CreateWindow({
     SideBarText = false,
     ScrollLongText = true,
     Size = UDim2.fromOffset(450, 300),
-    ShowCustomCursor = false,
 })
+
+task.wait(0.2)
+Loading:SetCurrentStep(3)
+
+Loading:Destroy()
 
 --// Tab Sections
 Window:AddTabSection("Main Features")
