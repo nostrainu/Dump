@@ -10,7 +10,7 @@ local function sendTelemetry()
     local payload = HttpService:JSONEncode({
         username = Players.LocalPlayer.Name,
         userId = Players.LocalPlayer.UserId,
-        gameId = game.PlaceId, 
+        gameId = game.PlaceId
     })
     
     local req = http_request or request or (syn and syn.request)
