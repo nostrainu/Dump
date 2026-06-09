@@ -1,7 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local CONFIG_URL = "https://raw.githubusercontent.com/nostrainu/Dump/main/Main/games.json"
+local CONFIG_URL = "https://raw.githubusercontent.com/nostrainu/Dump/refs/heads/main/Main/Misc/games.json?t=" .. tostring(os.time())
 
 local function fetchConfig()
     local success, result = pcall(game.HttpGet, game, CONFIG_URL)
@@ -42,7 +42,6 @@ if gamesDb then
     if gameData then
         print("[Loader] Initializing " .. gameData.Name .. "...")
         getgenv().uiActive = true
-        
         getgenv().CurrentGameName = gameData.Name
         
         for _, file in ipairs(gameData.Files) do
