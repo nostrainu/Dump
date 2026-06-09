@@ -4,11 +4,11 @@
         "Files": [
             {
                 "Type": "Functions",
-                "Url": "https://raw.githubusercontent.com/nostrainu/ScriptDump/main/Main/BRF/BRFfunc.lua"
+                "Url": "https://raw.githubusercontent.com/nostrainu/Dump/main/Main/BRF/BRFfunc.lua"
             },
             {
                 "Type": "UI",
-                "Url": "https://raw.githubusercontent.com/nostrainu/ScriptDump/main/Main/BRF/BRFmain.lua"
+                "Url": "https://raw.githubusercontent.com/nostrainu/Dump/main/Main/BRF/BRFmain.lua"
             }
         ]
     }
