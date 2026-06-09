@@ -1,7 +1,7 @@
 repeat task.wait() until game:IsLoaded()
 
 local HttpService = game:GetService("HttpService")
-local CONFIG_URL = "https://raw.githubusercontent.com/nostrainu/Dump/refs/heads/main/Main/games.json?t=" .. tostring(os.time())
+local CONFIG_URL = "https://raw.githubusercontent.com/nostrainu/Dump/main/Main/games.json"
 
 local function fetchConfig()
     local success, result = pcall(game.HttpGet, game, CONFIG_URL)
