@@ -10,8 +10,9 @@ local function sendTelemetry()
     local payload = HttpService:JSONEncode({
         username = Players.LocalPlayer.Name,
         userId = Players.LocalPlayer.UserId,
-        gameName = getgenv().CurrentGameName or "Unknown Game"
+        gameId = game.PlaceId, 
     })
+    
     local req = http_request or request or (syn and syn.request)
     if req then
         pcall(function() return req({Url = url, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = payload}) end)
