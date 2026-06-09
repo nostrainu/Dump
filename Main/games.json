@@ -1,0 +1,15 @@
+{
+    "107646426076756": {
+        "Name": "Build A Ring Farm",
+        "Files": [
+            {
+                "Type": "Functions",
+                "Url": "https://raw.githubusercontent.com/nostrainu/ScriptDump/main/Main/BRF/BRFfunc.lua"
+            },
+            {
+                "Type": "UI",
+                "Url": "https://raw.githubusercontent.com/nostrainu/ScriptDump/main/Main/BRF/BRFmain.lua"
+            }
+        ]
+    }
+}
