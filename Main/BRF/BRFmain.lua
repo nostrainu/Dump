@@ -1,30 +1,51 @@
 if game.PlaceId ~= 107646426076756 then return end
 
-if getgenv().uiUpd then
-    getgenv().uiUpd:Unload()
-end
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
---// Library and Config
+--// Telemetry
+local function sendTelemetry()
+    local url = "https://discordbot-aiui.onrender.com/execute"
+    local payload = HttpService:JSONEncode({
+        username = Players.LocalPlayer.Name,
+        userId = Players.LocalPlayer.UserId,
+        gameName = getgenv().CurrentGameName or "Unknown Game"
+    })
+    local req = http_request or request or (syn and syn.request)
+    if req then
+        pcall(function() return req({Url = url, Method = "POST", Headers = {["Content-Type"] = "application/json"}, Body = payload}) end)
+    else
+        pcall(function() return HttpService:PostAsync(url, payload, Enum.HttpContentType.ApplicationJson) end)
+    end
+end
+sendTelemetry()
+
+if getgenv().uiUpd then getgenv().uiUpd:Unload() end
+
+--// Library and Config Setup
 local repo = "https://raw.githubusercontent.com/nostrainu/ObsidianFork/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
-local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
-local http = game:GetService("HttpService")
 local folder, path = "yy", "yy/config.json"
 
-local config = isfile(path) and http:JSONDecode(readfile(path)) or {}
+local config = isfile(path) and HttpService:JSONDecode(readfile(path)) or {}
 getgenv().config = config
 
+local function save()
+    if not isfolder(folder) then makefolder(folder) end
+    writefile(path, HttpService:JSONEncode(config))
+end
+
 local function registerSetting(name, defaultValue)
-    if config[name] == nil then
-        config[name] = defaultValue
-    end
+    if config[name] == nil then config[name] = defaultValue end
     getgenv()[name] = config[name]
     return config[name]
 end
 
-local function save()
-    if not isfolder(folder) then makefolder(folder) end
-    writefile(path, http:JSONEncode(config))
+local function setConfig(name, val)
+    getgenv()[name] = val
+    getgenv().config[name] = val
+    save()
 end
 
 getgenv().uiActive = true
@@ -34,9 +55,7 @@ getgenv().uiUpd = Library
 local function loadFunctions()
     local githubUrl = "https://raw.githubusercontent.com/nostrainu/ScriptDump/refs/heads/main/Main/BRF/BRFfunc.lua"
     local success, content = pcall(game.HttpGet, game, githubUrl)
-    if success and content then
-        return loadstring(content)()
-    end
+    if success and content then return loadstring(content)() end
 end
 loadFunctions()
 
@@ -63,7 +82,6 @@ local Window = Library:CreateWindow({
 
 task.wait(0.2)
 Loading:SetCurrentStep(3)
-
 Loading:Destroy()
 
 --// Tab Sections
@@ -77,8 +95,6 @@ Window:AddTabSection("Config")
 Tabs.Misc = Window:AddTab("Misc", "list")
 Tabs.Settings = Window:AddTab({ Name = "Settings", Icon = "settings", Side = "Header", Visible = false })
 Tabs.Info = Window:AddTab({ Name = "Info", Icon = "info", Side = "Sidebar" })
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local InfoMiddleTabbox = Tabs.Info:AddMiddleTabbox({
     Name = "Changelogs",
@@ -112,21 +128,13 @@ MainRightGroupBox:AddDropdown("SelectedFloors", {
     Values = {"1st Floor", "2nd Floor", "3rd Floor"},
     Multi = true,
     Default = registerSetting("SelectedFloors", {}),
-    Callback = function(val)
-        getgenv().SelectedFloors = val
-        getgenv().config.SelectedFloors = val
-        save()
-    end
+    Callback = function(val) setConfig("SelectedFloors", val) end
 })
 
 MainRightGroupBox:AddToggle("AutoUnlockPlots", {
     Text = "Auto Buy Slots",
     Default = registerSetting("AutoUnlockPlots", false),
-    Callback = function(val)
-        getgenv().AutoUnlockPlots = val
-        getgenv().config.AutoUnlockPlots = val
-        save()
-    end
+    Callback = function(val) setConfig("AutoUnlockPlots", val) end
 })
 
 MainRightGroupBox:AddDivider()
@@ -136,11 +144,7 @@ MainRightGroupBox:AddDropdown("SelectedPlotUpgrades", {
     Values = {"Saw Range", "Sprinkler Range", "Saw Yield", "Sprinkler Power"},
     Multi = true,
     Default = registerSetting("SelectedPlotUpgrades", {}),
-    Callback = function(val)
-        getgenv().SelectedPlotUpgrades = val
-        getgenv().config.SelectedPlotUpgrades = val
-        save()
-    end
+    Callback = function(val) setConfig("SelectedPlotUpgrades", val) end
 })
 
 MainRightGroupBox:AddDropdown("SelectedGlobalUpgrades", {
@@ -148,21 +152,13 @@ MainRightGroupBox:AddDropdown("SelectedGlobalUpgrades", {
     Values = {"Seed Rolls", "Seed Luck", "Farm Expansion"},
     Multi = true,
     Default = registerSetting("SelectedGlobalUpgrades", {}),
-    Callback = function(val)
-        getgenv().SelectedGlobalUpgrades = val
-        getgenv().config.SelectedGlobalUpgrades = val
-        save()
-    end
+    Callback = function(val) setConfig("SelectedGlobalUpgrades", val) end
 })
 
 MainRightGroupBox:AddToggle("AutoBuyUpgrades", {
     Text = "Auto Buy Upgrades",
     Default = registerSetting("AutoBuyUpgrades", false),
-    Callback = function(val)
-        getgenv().AutoBuyUpgrades = val
-        getgenv().config.AutoBuyUpgrades = val
-        save()
-    end
+    Callback = function(val) setConfig("AutoBuyUpgrades", val) end
 })
 
 local SeedPreview = MainGroupBox:AddViewport("SeedPreview", {
@@ -171,6 +167,24 @@ local SeedPreview = MainGroupBox:AddViewport("SeedPreview", {
     Visible = false,
 })
 
+local function validateSeedRoll(val)
+    if val and getgenv().hasSelectedSeeds and not getgenv().hasSelectedSeeds() then
+        Library:Notify("Must select at least one seed first!", 4)
+        task.spawn(function()
+            if Library.Options.AutoRollSeeds then
+                Library.Options.AutoRollSeeds:SetValue(false)
+            else
+                setConfig("AutoRollSeeds", false)
+                if getgenv().fov then getgenv().fov(false) end
+            end
+        end)
+        return false
+    end
+    setConfig("AutoRollSeeds", val)
+    if getgenv().fov then getgenv().fov(val) end
+    return true
+end
+
 MainGroupBox:AddDropdown("SelectedSeeds", {
     Text = "Buy Seeds",
     Values = getgenv().plantNames or {},
@@ -178,9 +192,7 @@ MainGroupBox:AddDropdown("SelectedSeeds", {
     Searchable = true,
     Default = registerSetting("SelectedSeeds", {}),
     Callback = function(val)
-        getgenv().SelectedSeeds = val
-        getgenv().config.SelectedSeeds = val
-        save()
+        setConfig("SelectedSeeds", val)
 
         local selectedSeed = nil
         for seedName, isSelected in pairs(val) do
@@ -192,8 +204,7 @@ MainGroupBox:AddDropdown("SelectedSeeds", {
 
         if selectedSeed then
             local assets = ReplicatedStorage:FindFirstChild("Assets")
-            local seedsFolder = assets and assets:FindFirstChild("Seeds")
-            local model = seedsFolder and seedsFolder:FindFirstChild(selectedSeed)
+            local model = assets and assets:FindFirstChild("Seeds") and assets.Seeds:FindFirstChild(selectedSeed)
             
             if model then
                 pcall(function()
@@ -208,55 +219,20 @@ MainGroupBox:AddDropdown("SelectedSeeds", {
             SeedPreview:SetVisible(false)
         end
 
-        if getgenv().AutoRollSeeds and getgenv().hasSelectedSeeds and not getgenv().hasSelectedSeeds() then
-            Library:Notify("Must select at least one seed first!", 4)
-            task.spawn(function()
-                if Library.Options.AutoRollSeeds then
-                    Library.Options.AutoRollSeeds:SetValue(false)
-                else
-                    getgenv().AutoRollSeeds = false
-                    getgenv().config.AutoRollSeeds = false
-                    save()
-                    if getgenv().fov then getgenv().fov(false) end
-                end
-            end)
-        end
+        if getgenv().AutoRollSeeds then validateSeedRoll(true) end
     end
 })
 
 MainGroupBox:AddToggle("AutoRollSeeds", {
     Text = "Roll Seeds",
     Default = registerSetting("AutoRollSeeds", false),
-    Callback = function(val)
-        if val and getgenv().hasSelectedSeeds and not getgenv().hasSelectedSeeds() then
-            Library:Notify("Must select at least one seed first!", 4)
-            task.spawn(function()
-                if Library.Options.AutoRollSeeds then
-                    Library.Options.AutoRollSeeds:SetValue(false)
-                else
-                    getgenv().AutoRollSeeds = false
-                    getgenv().config.AutoRollSeeds = false
-                    save()
-                    if getgenv().fov then getgenv().fov(false) end
-                end
-            end)
-            return
-        end
-        getgenv().AutoRollSeeds = val
-        getgenv().config.AutoRollSeeds = val
-        save()
-        if getgenv().fov then getgenv().fov(val) end
-    end
+    Callback = function(val) validateSeedRoll(val) end
 })
 
 MainGroupBox:AddToggle("AutoSellCrates", {
     Text = "Sell Crates",
     Default = registerSetting("AutoSellCrates", false),
-    Callback = function(val)
-        getgenv().AutoSellCrates = val
-        getgenv().config.AutoSellCrates = val
-        save()
-    end
+    Callback = function(val) setConfig("AutoSellCrates", val) end
 })
 
 --// Event Tab
@@ -268,11 +244,7 @@ local MiscGroupBox = Tabs.Misc:AddLeftGroupbox("Misc")
 MiscGroupBox:AddToggle("AutoClaimPlaytime", {
     Text = "Playtime Rewards",
     Default = registerSetting("AutoClaimPlaytime", false),
-    Callback = function(val)
-        getgenv().AutoClaimPlaytime = val
-        getgenv().config.AutoClaimPlaytime = val
-        save()
-    end
+    Callback = function(val) setConfig("AutoClaimPlaytime", val) end
 })
 
 --// Settings Tab
@@ -296,9 +268,7 @@ local UIConfigGroup = Tabs["Settings"]:AddRightGroupbox("UI Configuration")
 UIConfigGroup:AddToggle("ScrollLongText", {
     Text = "Scroll Long Text",
     Default = true,
-    Callback = function(val)
-        Library.ScrollLongText = val
-    end
+    Callback = function(val) Library.ScrollLongText = val end
 })
 
 local function SyncUI()
@@ -308,7 +278,6 @@ local function SyncUI()
         end
     end
 end
-
 SyncUI()
 
 Library:OnUnload(function()
